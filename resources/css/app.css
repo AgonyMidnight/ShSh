@@ -1,0 +1,11 @@
+html, body{
+    background-color: lightsteelblue;
+    color: black;
+}
+.grid {
+    display: grid;
+    grid-template-columns: 5fr 1fr;
+}
+.Outsider {
+    border: 1px solid navy;
+}
