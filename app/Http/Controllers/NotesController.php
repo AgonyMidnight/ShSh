@@ -61,17 +61,16 @@ class NotesController extends Controller
             'category_id' => 'required',
             'imgFile' => 'image'
         ]);
+
+        $note = new NotesModel();
+        $note->title = $request->input('title');
+        $note->description = $request->input('description');
+        $note->category_id = $category;
         if ($request->hasFile('imgFile')) {
             $folder = date('Y-m-d');
-            $image = $request->file('img')->store("images/{$folder}", "public");
+            $note->img = $request->file('imgFile')->store("images/{$folder}", "public");
         }
-        DB::table('notes')->insert([
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
-            'category_id' => $category,
-            'img' => $image ?? null
-        ]);
-
+        $note->save();
         return redirect('/');
     }
 
@@ -92,9 +91,11 @@ class NotesController extends Controller
      * @param  \App\Models\NotesModel  $notesModel
      * @return \Illuminate\Http\Response
      */
-    public function edit(NotesModel $notesModel)
+    //public function edit(NotesModel $notesModel)
+    public function edit($id)
     {
-        //
+        $data = (new ChangeController())->index($id);
+        return view('changeNote', ['data' => $data]);
     }
 
     /**
@@ -104,9 +105,18 @@ class NotesController extends Controller
      * @param  \App\Models\NotesModel  $notesModel
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, NotesModel $notesModel)
+    //public function update(Request $request, NotesModel $notesModel)
+    public function update(Request $request, $id)
     {
-        return view('/');
+        $request->validate([
+            'title' => 'required|max:180',
+            'description' => 'required'
+        ]);
+        $note = NotesModel::find($id);
+        $note->title = $request->input('title');
+        $note->description = $request->input('description');
+        $note->save();
+        return redirect('/Notes');
     }
 
     /**

@@ -19,3 +19,4 @@ Route::get('/', function () {
 });
 Route::resource('/Notes', \App\Http\Controllers\NotesController::class);
 Route::resource('/New', \App\Http\Controllers\CategoryController::class);
+Route::resource('/Change', \App\Http\Controllers\CategoryController::class);
