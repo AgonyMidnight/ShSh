@@ -24,7 +24,7 @@ class NotesController extends Controller
     public function index()
     {
         $notes = NotesModel::all();
-        return view('welcome',['date'=>$notes]);
+        return view('index',['date'=>$notes]);
     }
 
     /**
