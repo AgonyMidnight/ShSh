@@ -2,26 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CategoryModel;
 use App\Models\NotesModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class NotesController extends Controller
 {
+    protected $categoty;
+    public function __construct(CategoryController $categoryController)
+    {
+        $this->categoty = $categoryController;
+    }
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
 
-
-
-
-
-
     public function index()
     {
-        $notes = DB::table('notes')->select('*')->get();
+        $notes = NotesModel::all();
         return view('welcome',['date'=>$notes]);
     }
 
@@ -32,7 +34,7 @@ class NotesController extends Controller
      */
     public function create()
     {
-        $allCategories = (new CategoryController)->index();
+        $allCategories = $this->categoty->index();
         return view('newNote',['all'=>$allCategories]);
     }
 
@@ -44,32 +46,13 @@ class NotesController extends Controller
      */
     public function store(Request $request)
     {
-        $category = 0;
-
-        if ($request->input('category_id') == 'add') {
-            (new CategoryController())->store($request);
-            $category = DB::table('categories')->select('id')->where('name', $request->input('newCategory'))->first();
-            $category = $category->id;
-        }
-        else {
-            $category = $request->input('category_id');
-        }
-
         $request->validate([
             'title' => 'required|max:180',
             'description' => 'required',
             'category_id' => 'required',
             'imgFile' => 'image'
         ]);
-
         $note = new NotesModel();
-        $note->title = $request->input('title');
-        $note->description = $request->input('description');
-        $note->category_id = $category;
-        if ($request->hasFile('imgFile')) {
-            $folder = date('Y-m-d');
-            $note->img = $request->file('imgFile')->store("images/{$folder}", "public");
-        }
         $note->save();
         return redirect('/');
     }
@@ -89,12 +72,12 @@ class NotesController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  \App\Models\NotesModel  $notesModel
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     //public function edit(NotesModel $notesModel)
     public function edit($id)
     {
-        $data = (new ChangeController())->index($id);
+        $data  = NotesModel::find($id);
         return view('changeNote', ['data' => $data]);
     }
 
@@ -103,7 +86,7 @@ class NotesController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\NotesModel  $notesModel
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
      */
     //public function update(Request $request, NotesModel $notesModel)
     public function update(Request $request, $id)
@@ -127,7 +110,7 @@ class NotesController extends Controller
      */
     public function destroy($id)
     {
-        DB::table('notes')->delete($id);
+        NotesModel::destroy($id);
         return redirect('/Notes');
     }
 }
